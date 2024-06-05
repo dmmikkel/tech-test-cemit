@@ -1,14 +1,5 @@
 import { useMemo } from "react";
-import {
-  extent,
-  interpolateRdYlGn,
-  interpolateReds,
-  interpolateYlOrBr,
-  line,
-  scaleLinear,
-  scaleSequential,
-} from "d3";
-import { maxDeviation, minDeviation, totalDistance } from "../data";
+import { extent, line, scaleLinear } from "d3";
 
 const totalWidth = 300;
 const totalHeight = 300;
@@ -16,7 +7,6 @@ const xPadding = 0;
 const yPadding = 0;
 const innerWidth = totalWidth - xPadding * 2;
 const innerHeight = totalHeight - yPadding * 2;
-const circleRadius = 2;
 
 type DataPoint = {
   lat: number;
@@ -31,43 +21,38 @@ export const TrackWidthMap = ({
   data: Array<DataPoint>;
   highlightDistance: [number, number] | null;
 }) => {
-  const { xScale, yScale, barWidth, color, linePath, highlightPath } =
-    useMemo(() => {
-      const xDomain = extent(data.map((d) => d.lon));
-      const yDomain = extent(data.map((d) => d.lat));
+  const { linePath, highlightPath } = useMemo(() => {
+    const xDomain = extent(data.map((d) => d.lon));
+    const yDomain = extent(data.map((d) => d.lat));
 
-      if (xDomain[0] === undefined || yDomain[0] === undefined) {
-        throw new Error("xDomain[0] is undefined");
-      }
+    if (xDomain[0] === undefined || yDomain[0] === undefined) {
+      throw new Error("xDomain[0] is undefined");
+    }
 
-      const xScale = scaleLinear().domain(xDomain).range([0, innerWidth]);
-      const yScale = scaleLinear().domain(yDomain).range([innerHeight, 0]);
-      const color = scaleSequential(interpolateRdYlGn).domain([1, 0]);
-      const lineBuilder = line<DataPoint>()
-        .x((d) => xScale(d.lon))
-        .y((d) => yScale(d.lat));
+    const xScale = scaleLinear().domain(xDomain).range([0, innerWidth]);
+    const yScale = scaleLinear().domain(yDomain).range([innerHeight, 0]);
 
-      const linePath = lineBuilder(data);
+    const lineBuilder = line<DataPoint>()
+      .x((d) => xScale(d.lon))
+      .y((d) => yScale(d.lat));
 
-      const highlightStart = highlightDistance?.[0];
-      const highlightEnd = highlightDistance?.[1];
-      const highlightData =
-        highlightStart !== undefined && highlightEnd !== undefined
-          ? data.filter(
-              (x) => x.distance >= highlightStart && x.distance <= highlightEnd,
-            )
-          : null;
-      const highlightPath = highlightData ? lineBuilder(highlightData) : null;
+    const linePath = lineBuilder(data);
 
-      return {
-        xScale,
-        yScale,
-        barWidth: innerWidth / data.length - 8,
-        color,
-        linePath,
-        highlightPath,
-      };
-    }, [data, highlightDistance]);
+    const highlightStart = highlightDistance?.[0];
+    const highlightEnd = highlightDistance?.[1];
+    const highlightData =
+      highlightStart !== undefined && highlightEnd !== undefined
+        ? data.filter(
+            (x) => x.distance >= highlightStart && x.distance <= highlightEnd,
+          )
+        : null;
+    const highlightPath = highlightData ? lineBuilder(highlightData) : null;
+
+    return {
+      linePath,
+      highlightPath,
+    };
+  }, [data, highlightDistance]);
 
   return (
     <svg

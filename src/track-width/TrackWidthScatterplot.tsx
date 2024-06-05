@@ -1,12 +1,5 @@
 import { useMemo } from "react";
-import {
-  extent,
-  interpolateRdYlGn,
-  interpolateReds,
-  interpolateYlOrBr,
-  scaleLinear,
-  scaleSequential,
-} from "d3";
+import { interpolateRdYlGn, scaleLinear, scaleSequential } from "d3";
 import { maxDeviation, minDeviation, totalDistance } from "../data";
 
 const totalWidth = 800;
@@ -15,7 +8,6 @@ const xPadding = 0;
 const yPadding = 0;
 const innerWidth = totalWidth - xPadding * 2;
 const innerHeight = totalHeight - yPadding * 2;
-const circleRadius = 2;
 
 export const TrackWidthScatterplot = ({
   data,
